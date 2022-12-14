@@ -73,6 +73,9 @@ public class ConnectFourTest {
         assertArrayEquals(testArray,testObj.getSpaces());
     }
 
+    /**
+     * Tests to see if various states are checked appropriately for win conditions.
+     */
     @Test
     public void testWinChecking()
     {
@@ -88,7 +91,6 @@ public class ConnectFourTest {
         assertEquals(true, testObj.win);
         //manually reset win tracker in testObj ready for next test
         testObj.win = false;
-        assertEquals(false, testObj.win);
         //horizontal wins next
         int[] horWin = {0,0,0,0,0,1};
         int[][] horizontalWinArray = {horWin, horWin, horWin, horWin, emptyCol, emptyCol, emptyCol};
@@ -96,7 +98,6 @@ public class ConnectFourTest {
         testObj.checkWinCondition();
         assertEquals(true, testObj.win);
         testObj.win = false;
-        assertEquals(false, testObj.win);
         //diag right wins
         int[] diagRow1 = {1,0,0,0,0,0};
         int[] diagRow2 = {0,1,0,0,0,0};
@@ -107,14 +108,12 @@ public class ConnectFourTest {
         testObj.checkWinCondition();
         assertEquals(true, testObj.win);
         testObj.win = false;
-        assertEquals(false, testObj.win);
         //diag left wins
         int[][] diagLeftArray = {diagRow4, diagRow3, diagRow2, diagRow1, emptyCol, emptyCol, emptyCol};
         testObj.setSpaces(diagLeftArray);
         testObj.checkWinCondition();
         assertEquals(true, testObj.win);
         testObj.win = false;
-        assertEquals(false, testObj.win);
         //no win at all
         int[][] noWinArray = {diagRow1, diagRow3, diagRow4, diagRow2, diagRow1, diagRow1, diagRow2};
         testObj.setSpaces(noWinArray);

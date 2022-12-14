@@ -65,11 +65,17 @@ public class ConnectFour {
         win = false;
     }
 
+    /**
+     * Begins the game loop for this connect four object.
+     */
     public void startGame()
     {
         gameLoop();
     }
 
+    /**
+     * The update loop for the  game. Will continue asking for inputs and checking win conditions until a winner is found.
+     */
     private void gameLoop()
     {
         updateScreen();
@@ -80,6 +86,9 @@ public class ConnectFour {
         }
     }
 
+    /**
+     * Asks for an input of which column to play. If a column is not correctly selected, nothing happens.
+     */
     private void requestInput()
     {
         //Use switch cases to enforce requested control scheme in brief.
@@ -130,6 +139,11 @@ public class ConnectFour {
 
 
     }
+
+    /**
+     * Plays a piece for the specified player. Swaps to the other player at the end of the turn.
+     * @param player the player the piece is to be played by
+     */
     public void playPiece(int player)
     {
         playBoard.space[cursor-1][5] = player;
@@ -138,6 +152,9 @@ public class ConnectFour {
         swapPlayer();
     }
 
+    /**
+     * Swaps between players.
+     */
     public void swapPlayer()
     {
         if(activePlayer == 1)
@@ -150,6 +167,9 @@ public class ConnectFour {
         }
     }
 
+    /**
+     * Checks for vertical, horizontal and diagonal wins for a player.
+     */
     public void checkWinCondition()
     {
         //check column direction wins
@@ -244,6 +264,9 @@ public class ConnectFour {
 
     }
 
+    /**
+     * unused currently. Held for if appropriate command for console input without pressing enter is found. Can then control cursor like a menu using this one.
+     */
     public void moveCursor(int movement)
     {
         setCursor(cursor + movement);

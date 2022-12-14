@@ -27,6 +27,7 @@ public class ConsoleUtilities {
 //            System.out.println(e.getMessage());
 //        }
 
+        //todo: see if this works on mac side at some point
         try {
 
             if (System.getProperty("os.name").contains("Windows")) {
