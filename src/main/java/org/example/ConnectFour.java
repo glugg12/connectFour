@@ -13,7 +13,8 @@ public class ConnectFour {
     //cursor highlights a column - row selection might be needed down the line
     protected int cursor;
     int activePlayer = 1;
-
+    boolean playingB = false;
+    boolean playingT = false;
     public boolean win;
 
     /**
@@ -88,11 +89,23 @@ public class ConnectFour {
 
     /**
      * Asks for an input of which column to play. If a column is not correctly selected, nothing happens.
+     * If B or T or input, activate special pieces.
      */
     private void requestInput()
     {
         //Use switch cases to enforce requested control scheme in brief.
-        System.out.printf("Player %d, Please choose column to play in > ", activePlayer);
+        if(playingB)
+        {
+            System.out.printf("Blitz! Please choose column to clear, %d > ", activePlayer);
+        }
+        else if(playingT)
+        {
+
+        }
+        else
+        {
+            System.out.printf("Player %d, Please choose column to play in > ", activePlayer);
+        }
         String input = inStream.nextLine();
         switch(input)
         {
@@ -103,12 +116,56 @@ public class ConnectFour {
             case("5"):
             case("6"):
             case("7"):
-                setCursor(Integer.parseInt(input));
-                playPiece(activePlayer);
+                //if we're currently playing a special piece, we need to do different things.
+                //putting if statement here allows me to reuse this switch quite handily
+                if(playingB)
+                {
+                    setCursor(Integer.parseInt((input)));
+                    playColumnClear();
+                    playingB = false;
+                    swapPlayer();
+                }
+                else if(playingT)
+                {
+
+                }
+                else
+                {
+                    setCursor(Integer.parseInt(input));
+                    playPiece(activePlayer);
+                    swapPlayer();
+                }
+                break;
+            case("B"):
+            case("b"):
+                //activate special move
+                //only want to do stuff if we're not already in B mode
+                if(!playingB) {
+                    playingB = true;
+                }
                 break;
             default:
         }
 
+    }
+
+    public void playColumnClear()
+    {
+        //don't need to differentiate between players for this one.
+        //The blitz is indiscriminate in its destruction.
+        //can animate this one too! Let's loop through each space in the column, where each space "explodes" or something
+        for(int row = 5; row >= 0; row--)
+        {
+            playBoard.space[cursor -1][row] = 3;
+            updateScreen();
+        }
+        //once we've had our fun, need to set all pieces back to empty
+        for(int row = 5; row >= 0; row--)
+        {
+            playBoard.space[cursor -1][row] = 0;
+        }
+        //one last screen update
+        updateScreen();
     }
 
     /**
@@ -149,7 +206,6 @@ public class ConnectFour {
         playBoard.space[cursor-1][5] = player;
         updateScreen();
         animatePieceFalling();
-        swapPlayer();
     }
 
     /**
@@ -314,6 +370,8 @@ public class ConnectFour {
                     case 2:
                         System.out.print("O ");
                         break;
+                    case 3:
+                        System.out.print("§ ");
                 }
 
             }
