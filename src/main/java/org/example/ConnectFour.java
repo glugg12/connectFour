@@ -16,6 +16,7 @@ public class ConnectFour {
     boolean playingB = false;
     boolean playingT = false;
     public boolean win;
+    public boolean quit = false;
 
     /**
      * Getter for the array of board spaces
@@ -93,7 +94,7 @@ public class ConnectFour {
     private void gameLoop()
     {
         updateScreen(false);
-        while(!win)
+        while(!win && !quit)
         {
             requestInput();
             if(!playingT && !playingB)
@@ -127,6 +128,9 @@ public class ConnectFour {
         }
     }
 
+    /**
+     * Function for jar console animation of a timer on each bomb piece
+     */
     private void showBombStatus()
     {
         updateScreen(true);
@@ -135,6 +139,9 @@ public class ConnectFour {
         updateScreen(false);
     }
 
+    /**
+     * Ticks down bomb timers
+     */
     public void updateBombs()
     {
         //for each loop seems to give me values not reference? Can't believe I actually miss a pointer system.
@@ -162,6 +169,11 @@ public class ConnectFour {
             }
         }
     }
+
+    /**
+     * Causes any bombs with their timers depleted to clear the sapces around them.
+     * Timers are depleted when the space's value is 5.
+     */
     public void igniteBombs()
     {
         //if bomb timers are 0 pop em
@@ -263,6 +275,7 @@ public class ConnectFour {
     private void requestInput()
     {
         //Use switch cases to enforce requested control scheme in brief.
+        System.out.print("1-7 = Column Number; b = BLITZ; t = TIME BOMB; q = QUIT\n");
         if(playingB)
         {
             System.out.printf("Blitz! Please choose column to clear, %d > ", activePlayer);
@@ -299,13 +312,13 @@ public class ConnectFour {
                     setCursor(Integer.parseInt(input));
                     playTimeBomb();
                     playingT = false;
-                    swapPlayer();
+                    //swap player happens inside playPiece inside playTimeBomb
                 }
                 else
                 {
                     setCursor(Integer.parseInt(input));
                     playPiece(activePlayer);
-                    swapPlayer();
+                    //swap player happens inside playPiece
                 }
                 break;
             case("B"):
@@ -322,11 +335,20 @@ public class ConnectFour {
                 {
                     playingT = true;
                 }
+                break;
+            case("q"):
+            case("Q"):
+                quit = true;
+                break;
             default:
+                System.out.print("Invalid input\n");
         }
 
     }
 
+    /**
+     * Plays blitz - clears the column at the cursor's current position
+     */
     public void playColumnClear()
     {
         //don't need to differentiate between players for this one.
@@ -346,6 +368,9 @@ public class ConnectFour {
         updateScreen(false);
     }
 
+    /**
+     * plays a piece with code 9 - internally recognised as a time bomb.
+     */
     public void playTimeBomb()
     {
         //this gets played like any other piece, counts down for two opposing turns, then pops.
@@ -391,9 +416,18 @@ public class ConnectFour {
      */
     public void playPiece(int player)
     {
-        playBoard.space[cursor-1][5] = player;
-        updateScreen(false);
-        animatePieceFalling();
+        if(playBoard.space[cursor-1][5] == 0)
+        {
+            playBoard.space[cursor-1][5] = player;
+            updateScreen(false);
+            animatePieceFalling();
+            swapPlayer();
+        }
+        else
+        {
+            updateScreen(false);
+            System.out.print("That column is full mate, try somewhere else, or blitz it!\n");
+        }
     }
 
     /**

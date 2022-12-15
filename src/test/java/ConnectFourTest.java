@@ -144,6 +144,9 @@ public class ConnectFourTest {
         assertArrayEquals(outcomeArray,testObj.getSpaces());
     }
 
+    /**
+     * Tests if time bombs are clearing spaces correctly
+     */
     @Test
     public void testTimeBomb()
     {
