@@ -120,4 +120,86 @@ public class ConnectFourTest {
         testObj.checkWinCondition();
         assertEquals(false, testObj.win);
     }
+
+    /**
+     * Tests if a blitz clears a column correctly
+     */
+    @Test
+    public void testBlitz()
+    {
+        ConnectFour testObj = new ConnectFour();
+        int[] innerArray = {0,0,0,0,0,0};
+        int[] pieceColumn = {1,2,1,2,1,2};
+        //java does this weird thing where certain things are passed by reference even if I don't want it to be >:(
+        //I'm annoyed about it at this point of coding, so I'm investigating
+        //wonder if there's a way to just pass the values of a variable rather than the variable as a whole...
+        //hmm I could do a new int[][] inside playboard setSpace, but can I use a passed in var to initialise it? seems like a no.
+        //from digging around the net sounds like most people just pass through a loop to set values
+        //feels clunky, but I'll do that inside playBoard.setSpaces. Leaving notes here and will point here from there.
+        int testArray[][] = {innerArray,innerArray,pieceColumn,pieceColumn,pieceColumn,innerArray,innerArray};
+        testObj.setSpaces(testArray);
+        testObj.setCursor(4);
+        testObj.playColumnClear();
+        int outcomeArray[][] = {innerArray,innerArray,pieceColumn,innerArray,pieceColumn,innerArray,innerArray};
+        assertArrayEquals(outcomeArray,testObj.getSpaces());
+    }
+
+    @Test
+    public void testTimeBomb()
+    {
+        ConnectFour testObj = new ConnectFour();
+        int[] emptyRow = {0,0,0,0,0,0};
+        int[] checkerRow = {1,2,1,2,1,2};
+        int[] solidRow = {1,1,1,1,1,1};
+        int[][] mockBoard = {checkerRow, checkerRow, emptyRow, {1,1,5,1,1,1}, solidRow, solidRow, emptyRow};
+        //I have to visualise this one lol
+        // 2 2 0 1 1 1 0
+        // 1 1 0 1 1 1 0
+        // 2 2 0 1 1 1 0
+        // 1 1 0 1 1 1 0
+        // 2 2 0 1 1 1 0
+        // 1 1 0 1 1 1 0
+        //
+        //Nice. If we were to place a bomb say... here...
+        // 2 2 0 1 1 1 0
+        // 1 1 0 1 1 1 0
+        // 2 2 0 1 1 1 0
+        // 1 1 0 * 1 1 0
+        // 2 2 0 1 1 1 0
+        // 1 1 0 1 1 1 0
+        //
+        //When it fires off, we should clear hor, ver, and diag to get...
+        // 2 2 0 1 1 1 0
+        // 1 1 0 1 1 1 0
+        // 2 2 § § § 1 0
+        // 1 1 § * § 1 0
+        // 2 2 § § § 1 0
+        // 1 1 0 1 1 1 0
+        //
+        // 2 2 0 1 1 1 0
+        // 1 1 0 1 1 1 0
+        // 2 2 0 0 0 1 0
+        // 1 1 0 0 0 1 0
+        // 2 2 0 0 0 1 0
+        // 1 1 0 1 1 1 0
+        //
+        int[][] outcome = {{1,2,1,2,1,2},{1,2,1,2,1,2}, {0,0,0,0,0,0}, {1,0,0,0,1,1},{1,0,0,0,1,1},{1,1,1,1,1,1},{0,0,0,0,0,0}};
+        testObj.setSpaces(mockBoard);
+        //bomb should ignite just fine
+        testObj.igniteBombs();
+        assertArrayEquals(outcome,testObj.getSpaces());
+        //going to test against some (literal) edge cases next
+        //bottom left corner
+        outcome = new int[][]{{0,0,1,2,1,2},{0,0,1,2,1,2}, {0,0,0,0,0,0}, {1,1,1,1,1,1},{1,1,1,1,1,1},{1,1,1,1,1,1},{0,0,0,0,0,0}};
+        int[][] mockBoard2 = {{5,2,1,2,1,2},{1,2,1,2,1,2}, {0,0,0,0,0,0}, {1,1,1,1,1,1},{1,1,1,1,1,1},{1,1,1,1,1,1},{0,0,0,0,0,0}};
+        testObj.setSpaces(mockBoard2);
+        testObj.igniteBombs();
+        assertArrayEquals(outcome,testObj.getSpaces());
+        //far right edge
+        int[][] mockBoard3 = {{1,2,1,2,1,2},{1,2,1,2,1,2}, {0,0,0,0,0,0}, {1,1,1,1,1,1},{1,1,1,1,1,1},{1,1,1,1,1,1},{0,0,0,5,0,0}};
+        outcome = new int[][]{{1,2,1,2,1,2},{1,2,1,2,1,2}, {0,0,0,0,0,0}, {1,1,1,1,1,1},{1,1,1,1,1,1},{1,1,0,0,0,1},{0,0,0,0,0,0}};
+        testObj.setSpaces(mockBoard3);
+        testObj.igniteBombs();
+        assertArrayEquals(outcome,testObj.getSpaces());
+    }
 }
