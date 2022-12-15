@@ -13,7 +13,8 @@ public class ConnectFour {
     //cursor highlights a column - row selection might be needed down the line
     protected int cursor;
     int activePlayer = 1;
-
+    boolean playingB = false;
+    boolean playingT = false;
     public boolean win;
 
     /**
@@ -25,7 +26,20 @@ public class ConnectFour {
         return playBoard.space;
     }
 
-    public void setSpaces(int[][] inArray) {playBoard.space = inArray;}
+    public void setSpaces(int[][] inArray) {
+        //Was having issues with pass by reference stuff in java wrt array.
+        //See the train of thought over in ConnectFourTest.testBlitz() that led to the loops.
+
+        //don't think I can do a for each where I pull out of two different vars.
+        //maybe maps? Rings a bell? Will come back to this if I have time.
+        for(int column = 0; column < 7; column++)
+        {
+            for(int row = 0; row < 6; row++)
+            {
+                playBoard.space[column][row] = inArray[column][row];
+            }
+        }
+    }
 
     /**
      * Setter for cursor position clamps to 1 <= newCursor <= 7
@@ -78,21 +92,189 @@ public class ConnectFour {
      */
     private void gameLoop()
     {
-        updateScreen();
+        updateScreen(false);
         while(!win)
         {
             requestInput();
+            if(!playingT && !playingB)
+            {
+                boolean bombPresent = false;
+                //I'm just checking spaces for bombs. Could store bombs and their positions in a list instead to save doing this each time.
+                //Probably better, but saving it as a "tidy up" kind of job
+                for(int column[]:playBoard.space)
+                {
+                    for(int space:column)
+                    {
+                        if(space <=9 && space >=6)
+                        {
+                            bombPresent = true;
+                        }
+                    }
+                }
+                if(bombPresent)
+                {
+                    showBombStatus();
+                    //I could update bomb values every time, but we only really need to do it if there's a bomb on board
+                    updateBombs();
+                    showBombStatus();
+                    //we need to fire off any bombs with a 0 (actual value 5) value.
+                    igniteBombs();
+                    updateScreen(false);
+
+                }
+            }
             checkWinCondition();
+        }
+    }
+
+    private void showBombStatus()
+    {
+        updateScreen(true);
+        updateScreen(false);
+        updateScreen(true);
+        updateScreen(false);
+    }
+
+    public void updateBombs()
+    {
+        //for each loop seems to give me values not reference? Can't believe I actually miss a pointer system.
+
+//        for(int column[]:playBoard.space)
+//        {
+//            for(int space:column)
+//            {
+//                if(space <=9 && space >=6)
+//                {
+//                    //if we find a bomb in a space, tick it down a step
+//                    space-=1;
+//                }
+//            }
+//        }
+
+        for(int col = 0; col < 7; col++)
+        {
+            for(int row = 0; row<6; row++)
+            {
+                if(playBoard.space[col][row] <=9 && playBoard.space[col][row] >=6)
+                {
+                    playBoard.space[col][row]--;
+                }
+            }
+        }
+    }
+    public void igniteBombs()
+    {
+        //if bomb timers are 0 pop em
+        //in our system we're looking for 5
+        for(int col = 0; col < 7; col++)
+        {
+            for(int row = 0; row<6; row++)
+            {
+                if(playBoard.space[col][row] == 5)
+                {
+                    //we need to set spaces all around this thing to 3 first for fun animations, then set it to 0.
+                    //spaces to hit
+                    //[x-1,y+1] [x, y+1] [x+1,y+1]
+                    //[x-1,y+0] B O M B  [x+1,y+0]
+                    //[x-1,y-1] [x, y-1] [x+1,y-1]
+
+                    //also need to be aware of out of bounds index here
+                    //check if our value is at any edges, and if we are, don't try and change anything past that bounds
+                    if(col != 0)
+                    {
+                        playBoard.space[col-1][row] = 3;
+                        if(row != 0)
+                        {
+                            playBoard.space[col-1][row-1] = 3;
+                        }
+                        if(row != 5)
+                        {
+                            playBoard.space[col-1][row+1] = 3;
+                        }
+                    }
+                    if(col != 6)
+                    {
+                        playBoard.space[col+1][row] = 3;
+                        if(row != 0)
+                        {
+                            playBoard.space[col+1][row-1] = 3;
+                        }
+                        if(row != 5)
+                        {
+                            playBoard.space[col+1][row+1] = 3;
+                        }
+                    }
+                    if(row != 0)
+                    {
+                        playBoard.space[col][row-1] = 3;
+                    }
+                    if(row != 5)
+                    {
+                        playBoard.space[col][row+1] = 3;
+                    }
+                    //this one should never be out of bounds.
+                    playBoard.space[col][row] = 3;
+
+                    updateScreen(false);
+                    if(col != 0)
+                    {
+                        playBoard.space[col-1][row] = 0;
+                        if(row != 0)
+                        {
+                            playBoard.space[col-1][row-1] = 0;
+                        }
+                        if(row != 5)
+                        {
+                            playBoard.space[col-1][row+1] = 0;
+                        }
+                    }
+                    if(col != 6)
+                    {
+                        playBoard.space[col+1][row] = 0;
+                        if(row != 0)
+                        {
+                            playBoard.space[col+1][row-1] = 0;
+                        }
+                        if(row != 5)
+                        {
+                            playBoard.space[col+1][row+1] = 0;
+                        }
+                    }
+                    if(row != 0)
+                    {
+                        playBoard.space[col][row-1] = 0;
+                    }
+                    if(row != 5)
+                    {
+                        playBoard.space[col][row+1] = 0;
+                    }
+                    //this one should never be out of bounds.
+                    playBoard.space[col][row] = 0;
+
+                }
+            }
         }
     }
 
     /**
      * Asks for an input of which column to play. If a column is not correctly selected, nothing happens.
+     * If B or T or input, activate special pieces.
      */
     private void requestInput()
     {
         //Use switch cases to enforce requested control scheme in brief.
-        System.out.printf("Player %d, Please choose column to play in > ", activePlayer);
+        if(playingB)
+        {
+            System.out.printf("Blitz! Please choose column to clear, %d > ", activePlayer);
+        }
+        else if(playingT)
+        {
+            System.out.printf("Time Bomb! Please choose column to place it in, %d > ", activePlayer);
+        }
+        else
+        {
+            System.out.printf("Player %d, Please choose column to play in > ", activePlayer);
+        }
         String input = inStream.nextLine();
         switch(input)
         {
@@ -103,12 +285,75 @@ public class ConnectFour {
             case("5"):
             case("6"):
             case("7"):
-                setCursor(Integer.parseInt(input));
-                playPiece(activePlayer);
+                //if we're currently playing a special piece, we need to do different things.
+                //putting if statement here allows me to reuse this switch quite handily
+                if(playingB)
+                {
+                    setCursor(Integer.parseInt(input));
+                    playColumnClear();
+                    playingB = false;
+                    swapPlayer();
+                }
+                else if(playingT)
+                {
+                    setCursor(Integer.parseInt(input));
+                    playTimeBomb();
+                    playingT = false;
+                    swapPlayer();
+                }
+                else
+                {
+                    setCursor(Integer.parseInt(input));
+                    playPiece(activePlayer);
+                    swapPlayer();
+                }
                 break;
+            case("B"):
+            case("b"):
+                //activate special move
+                //only want to do stuff if we're not already in B mode
+                if(!playingB) {
+                    playingB = true;
+                }
+                break;
+            case("T"):
+            case("t"):
+                if(!playingT)
+                {
+                    playingT = true;
+                }
             default:
         }
 
+    }
+
+    public void playColumnClear()
+    {
+        //don't need to differentiate between players for this one.
+        //The blitz is indiscriminate in its destruction.
+        //can animate this one too! Let's loop through each space in the column, where each space "explodes" or something
+        for(int row = 5; row >= 0; row--)
+        {
+            playBoard.space[cursor -1][row] = 3;
+            updateScreen(false);
+        }
+        //once we've had our fun, need to set all pieces back to empty
+        for(int row = 5; row >= 0; row--)
+        {
+            playBoard.space[cursor -1][row] = 0;
+        }
+        //one last screen update
+        updateScreen(false);
+    }
+
+    public void playTimeBomb()
+    {
+        //this gets played like any other piece, counts down for two opposing turns, then pops.
+        //effectively, this is 4 whole moves regardless of player - 1 plays (0), 2 (1) > 1 (2) > 2 (3) > pop
+        //going to place a 9 and when it hits six we can initiate destruction of the helpless connect four pieces
+        //ooh I can reuse the play piece and give it a "player" code 9, which should place it in, then after each move,
+        //but before win condition checks, pop it. Means a winning set can be ruined by a bomb, which would be funny.
+        playPiece(9);
     }
 
     /**
@@ -134,7 +379,7 @@ public class ConnectFour {
                     }
                 }
             }
-            updateScreen();
+            updateScreen(false);
         }
 
 
@@ -147,9 +392,8 @@ public class ConnectFour {
     public void playPiece(int player)
     {
         playBoard.space[cursor-1][5] = player;
-        updateScreen();
+        updateScreen(false);
         animatePieceFalling();
-        swapPlayer();
     }
 
     /**
@@ -270,13 +514,13 @@ public class ConnectFour {
     public void moveCursor(int movement)
     {
         setCursor(cursor + movement);
-        updateScreen();
+        updateScreen(false);
     }
 
     /**
      * updateScreen clears console and redraws with new states. Does not clear console in IDE console.
      */
-    public void updateScreen()
+    public void updateScreen(boolean flashBombStatus)
     {
         try
         {
@@ -314,6 +558,60 @@ public class ConnectFour {
                     case 2:
                         System.out.print("O ");
                         break;
+                    case 3:
+                        System.out.print("§ ");
+                        break;
+                    case 9:
+                        if(flashBombStatus)
+                        {
+                            System.out.print("4 ");
+                        }
+                        else
+                        {
+                            System.out.print("* ");
+                        }
+                        break;
+                    case 8:
+                        if(flashBombStatus)
+                        {
+                            System.out.print("3 ");
+                        }
+                        else
+                        {
+                            System.out.print("* ");
+                        }
+                        break;
+                    case 7:
+                        if(flashBombStatus)
+                        {
+                            System.out.print("2 ");
+                        }
+                        else
+                        {
+                            System.out.print("* ");
+                        }
+                        break;
+                    case 6:
+                        if(flashBombStatus)
+                        {
+                            System.out.print("1 ");
+                        }
+                        else
+                        {
+                            System.out.print("* ");
+                        }
+                        break;
+                    case 5:
+                        if(flashBombStatus)
+                        {
+                            System.out.print("0 ");
+                        }
+                        else
+                        {
+                            System.out.print("* ");
+                        }
+                        break;
+
                 }
 
             }
