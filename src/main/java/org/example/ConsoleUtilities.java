@@ -9,25 +9,10 @@ public class ConsoleUtilities {
      */
     public static void clearConsole()
     {
-//        try
-//        {
-//            final String os = System.getProperty("os.name");
-//            if (os.contains("Windows"))
-//            {
-//                Runtime.getRuntime().exec("cls");
-//            }
-//            else
-//            {
-//                System.out.print("\033[H\033[2J");
-//                System.out.flush();
-//            }
-//        }
-//        catch (IOException e)
-//        {
-//            System.out.println(e.getMessage());
-//        }
 
-        //todo: see if this works on mac side at some point
+        //not my discovery, dug around the net for this stuff
+        //runs clear command for windows console, otherwise runs something I forget the name of. Ansii escape?
+        //pulled from stackoverflow iirc? need to find that link again
         try {
 
             if (System.getProperty("os.name").contains("Windows")) {

@@ -8,11 +8,14 @@ class Board
     public int[][] space = new int[7][6];
 }
 public class ConnectFour {
+    //internal scanner.
     Scanner inStream = new Scanner(System.in);
+    //the game board
     public Board playBoard;
     //cursor highlights a column - row selection might be needed down the line
     protected int cursor;
     int activePlayer = 1;
+    //trackers for if we're in any of the special moves
     boolean playingB = false;
     boolean playingT = false;
     public boolean win;
@@ -73,10 +76,17 @@ public class ConnectFour {
      * Could have used a multidimensional array of chars I suppose, but numbers work fine as is. I like ints.
      */
     public ConnectFour() {
+        //constructor
+        //set an array with all rows empoty
         int[][] rows = {{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0},{0,0,0,0,0,0}};
+        //init board obj
         this.playBoard = new Board();
+        //pass values into board
         this.playBoard.space = rows;
+        //if I had found a way to do nice arrow key controls for the console, this would've been set to a position on the board
+        //instead, just setting it to a non value so the cursor doesn't show until a column was picked
         this.cursor = -1;
+        //win condition tracker to track if the condition of the win has been met. Conditionally winning.
         win = false;
     }
 
@@ -85,6 +95,8 @@ public class ConnectFour {
      */
     public void startGame()
     {
+        //this was just part of the constructor at one point but the flexibilit
+        // to start a game on my mark rather than whenever I make one of these objects is nice
         gameLoop();
     }
 
@@ -97,6 +109,11 @@ public class ConnectFour {
         while(!win && !quit)
         {
             requestInput();
+            //if we're quitting let's get out without doing any other update stuff actuaally
+            if(quit)
+            {
+                return;
+            }
             if(!playingT && !playingB)
             {
                 boolean bombPresent = false;
@@ -133,6 +150,7 @@ public class ConnectFour {
      */
     private void showBombStatus()
     {
+        //we're just changing a bomb icon to its counter on each alternate update
         updateScreen(true);
         updateScreen(false);
         updateScreen(true);
@@ -266,6 +284,8 @@ public class ConnectFour {
                 }
             }
         }
+        //once all that is done, we need to let pieces fall
+        animatePieceFalling();
     }
 
     /**
@@ -275,17 +295,20 @@ public class ConnectFour {
     private void requestInput()
     {
         //Use switch cases to enforce requested control scheme in brief.
-        System.out.print("1-7 = Column Number; b = BLITZ; t = TIME BOMB; q = QUIT\n");
+
         if(playingB)
         {
-            System.out.printf("Blitz! Please choose column to clear, %d > ", activePlayer);
+            System.out.print("1-7 = Column Number; b = Return to Regular Piece; t = TIME BOMB; q = QUIT\n");
+            System.out.printf("Blitz! Please choose column to clear %d > ", activePlayer);
         }
         else if(playingT)
         {
+            System.out.print("1-7 = Column Number; b = BLITZ; t = Return to Regular Piece; q = QUIT\n");
             System.out.printf("Time Bomb! Please choose column to place it in, %d > ", activePlayer);
         }
         else
         {
+            System.out.print("1-7 = Column Number; b = BLITZ; t = TIME BOMB; q = QUIT\n");
             System.out.printf("Player %d, Please choose column to play in > ", activePlayer);
         }
         String input = inStream.nextLine();
@@ -326,14 +349,30 @@ public class ConnectFour {
                 //activate special move
                 //only want to do stuff if we're not already in B mode
                 if(!playingB) {
+                    if(playingT)
+                    {
+                        playingT = false;
+                    }
                     playingB = true;
+                }
+                else
+                {
+                    playingB = false;
                 }
                 break;
             case("T"):
             case("t"):
                 if(!playingT)
                 {
+                    if(playingB)
+                    {
+                        playingB = false;
+                    }
                     playingT = true;
+                }
+                else
+                {
+                    playingT = false;
                 }
                 break;
             case("q"):
@@ -378,6 +417,8 @@ public class ConnectFour {
         //going to place a 9 and when it hits six we can initiate destruction of the helpless connect four pieces
         //ooh I can reuse the play piece and give it a "player" code 9, which should place it in, then after each move,
         //but before win condition checks, pop it. Means a winning set can be ruined by a bomb, which would be funny.
+
+        //honestly a function to run one line of code is a bit unneccessary, but I like the readability it gives.
         playPiece(9);
     }
 
@@ -450,6 +491,7 @@ public class ConnectFour {
      */
     public void checkWinCondition()
     {
+        //wonder if its worth decoupling these into their own things? They don't get used anywhere other than here so I'm leaving them as is
         //check column direction wins
         for(int column[] : playBoard.space)
         {
