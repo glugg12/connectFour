@@ -11,15 +11,15 @@ public class ConnectFour {
     //internal scanner.
     Scanner inStream = new Scanner(System.in);
     //the game board
-    public Board playBoard;
+    private Board playBoard;
     //cursor highlights a column - row selection might be needed down the line
     protected int cursor;
-    int activePlayer = 1;
+    private int activePlayer = 1;
     //trackers for if we're in any of the special moves
-    boolean playingB = false;
-    boolean playingT = false;
-    public boolean win;
-    public boolean quit = false;
+    private boolean playingB = false;
+    private boolean playingT = false;
+    private boolean win;
+    private boolean quit = false;
 
     /**
      * Getter for the array of board spaces
@@ -44,6 +44,9 @@ public class ConnectFour {
             }
         }
     }
+
+    public boolean getWinState(){ return this.win; }
+    public void setWinState(boolean inWin) { this.win = inWin; }
 
     /**
      * Setter for cursor position clamps to 1 <= newCursor <= 7
@@ -109,7 +112,7 @@ public class ConnectFour {
         while(!win && !quit)
         {
             requestInput();
-            //if we're quitting let's get out without doing any other update stuff actuaally
+            //if we're quitting let's get out without doing any other update stuff actually
             if(quit)
             {
                 return;
@@ -137,6 +140,7 @@ public class ConnectFour {
                     showBombStatus();
                     //we need to fire off any bombs with a 0 (actual value 5) value.
                     igniteBombs();
+                    animatePieceFalling();
                     updateScreen(false);
 
                 }
@@ -284,8 +288,6 @@ public class ConnectFour {
                 }
             }
         }
-        //once all that is done, we need to let pieces fall
-        animatePieceFalling();
     }
 
     /**
@@ -295,93 +297,101 @@ public class ConnectFour {
     private void requestInput()
     {
         //Use switch cases to enforce requested control scheme in brief.
-
-        if(playingB)
+        //have to put this in a while loop - had it running through the whole "game" loop before, but logic was also running
+        //inside the loop alongside the call to this function. Created the issue of bombs ticking down when moving from a special piece to a regular
+        //piece.
+        boolean piecePlayed = false;
+        while(!piecePlayed)
         {
-            System.out.print("1-7 = Column Number; b = Return to Regular Piece; t = TIME BOMB; q = QUIT\n");
-            System.out.printf("Blitz! Please choose column to clear %d > ", activePlayer);
-        }
-        else if(playingT)
-        {
-            System.out.print("1-7 = Column Number; b = BLITZ; t = Return to Regular Piece; q = QUIT\n");
-            System.out.printf("Time Bomb! Please choose column to place it in, %d > ", activePlayer);
-        }
-        else
-        {
-            System.out.print("1-7 = Column Number; b = BLITZ; t = TIME BOMB; q = QUIT\n");
-            System.out.printf("Player %d, Please choose column to play in > ", activePlayer);
-        }
-        String input = inStream.nextLine();
-        switch(input)
-        {
-            case("1"):
-            case("2"):
-            case("3"):
-            case("4"):
-            case("5"):
-            case("6"):
-            case("7"):
-                //if we're currently playing a special piece, we need to do different things.
-                //putting if statement here allows me to reuse this switch quite handily
-                if(playingB)
-                {
-                    setCursor(Integer.parseInt(input));
-                    playColumnClear();
-                    playingB = false;
-                    swapPlayer();
-                }
-                else if(playingT)
-                {
-                    setCursor(Integer.parseInt(input));
-                    playTimeBomb();
-                    playingT = false;
-                    //swap player happens inside playPiece inside playTimeBomb
-                }
-                else
-                {
-                    setCursor(Integer.parseInt(input));
-                    playPiece(activePlayer);
-                    //swap player happens inside playPiece
-                }
-                break;
-            case("B"):
-            case("b"):
-                //activate special move
-                //only want to do stuff if we're not already in B mode
-                if(!playingB) {
-                    if(playingT)
-                    {
-                        playingT = false;
-                    }
-                    playingB = true;
-                }
-                else
-                {
-                    playingB = false;
-                }
-                break;
-            case("T"):
-            case("t"):
-                if(!playingT)
-                {
+            if(playingB)
+            {
+                System.out.print("1-7 = Column Number; b = Return to Regular Piece; t = TIME BOMB; q = QUIT\n");
+                System.out.printf("Blitz! Please choose column to clear, Player %d > ", activePlayer);
+            }
+            else if(playingT)
+            {
+                System.out.print("1-7 = Column Number; b = BLITZ; t = Return to Regular Piece; q = QUIT\n");
+                System.out.printf("Time Bomb! Please choose column to place it in, Player %d > ", activePlayer);
+            }
+            else
+            {
+                System.out.print("1-7 = Column Number; b = BLITZ; t = TIME BOMB; q = QUIT\n");
+                System.out.printf("Player %d, Please choose column to play in > ", activePlayer);
+            }
+            String input = inStream.nextLine();
+            switch(input)
+            {
+                case("1"):
+                case("2"):
+                case("3"):
+                case("4"):
+                case("5"):
+                case("6"):
+                case("7"):
+                    //if we're currently playing a special piece, we need to do different things.
+                    //putting if statement here allows me to reuse this switch quite handily
                     if(playingB)
+                    {
+                        setCursor(Integer.parseInt(input));
+                        playColumnClear();
+                        playingB = false;
+                        swapPlayer();
+                    }
+                    else if(playingT)
+                    {
+                        setCursor(Integer.parseInt(input));
+                        playTimeBomb();
+                        playingT = false;
+                        //swap player happens inside playPiece inside playTimeBomb
+                    }
+                    else
+                    {
+                        setCursor(Integer.parseInt(input));
+                        playPiece(activePlayer);
+                        //swap player happens inside playPiece
+                    }
+                    piecePlayed = true;
+                    break;
+                case("B"):
+                case("b"):
+                    //activate special move
+                    //only want to do stuff if we're not already in B mode
+                    if(!playingB) {
+                        if(playingT)
+                        {
+                            playingT = false;
+                        }
+                        playingB = true;
+                    }
+                    else
                     {
                         playingB = false;
                     }
-                    playingT = true;
-                }
-                else
-                {
-                    playingT = false;
-                }
-                break;
-            case("q"):
-            case("Q"):
-                quit = true;
-                break;
-            default:
-                System.out.print("Invalid input\n");
+                    break;
+                case("T"):
+                case("t"):
+                    if(!playingT)
+                    {
+                        if(playingB)
+                        {
+                            playingB = false;
+                        }
+                        playingT = true;
+                    }
+                    else
+                    {
+                        playingT = false;
+                    }
+                    break;
+                case("q"):
+                case("Q"):
+                    quit = true;
+                    return;
+                default:
+                    System.out.print("Invalid input\n");
+            }
         }
+
 
     }
 
@@ -503,7 +513,7 @@ public class ConnectFour {
                         column[row] == column[row+3] &&
                         (column[row] == 1 || column[row] == 2))
                 {
-                    System.out.printf("Player %d wins!",column[row]);
+                    System.out.printf("Player %d wins!\n",column[row]);
                     win = true;
                 }
             }
@@ -519,7 +529,7 @@ public class ConnectFour {
                         playBoard.space[col][row] == playBoard.space[col + 3][row] &&
                         (playBoard.space[col][row] == 1 || playBoard.space[col][row] == 2))
                 {
-                    System.out.printf("Player %d wins!",playBoard.space[col][row]);
+                    System.out.printf("Player %d wins!\n",playBoard.space[col][row]);
                     win = true;
                 }
             }
