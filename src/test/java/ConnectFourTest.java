@@ -3,10 +3,10 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ConnectFourTest {
-    @Test
     /**
      * Tests to see if the playboard initialises correctly.
      */
+    @Test
     public void constructConnectFour()
     {
         int[] innerArray = {0,0,0,0,0,0};
@@ -86,18 +86,18 @@ public class ConnectFourTest {
         int[] emptyCol = {0,0,0,0,0,0};
         int[][] fullTestArray = {emptyCol,winningCol,emptyCol,emptyCol,emptyCol,emptyCol,emptyCol};
         testObj.setSpaces(fullTestArray);
-        assertEquals(false, testObj.win);
+        assertFalse(testObj.getWinState());
         testObj.checkWinCondition();
-        assertEquals(true, testObj.win);
+        assertTrue(testObj.getWinState());
         //manually reset win tracker in testObj ready for next test
-        testObj.win = false;
+        testObj.setWinState(false);
         //horizontal wins next
         int[] horWin = {0,0,0,0,0,1};
         int[][] horizontalWinArray = {horWin, horWin, horWin, horWin, emptyCol, emptyCol, emptyCol};
         testObj.setSpaces(horizontalWinArray);
         testObj.checkWinCondition();
-        assertEquals(true, testObj.win);
-        testObj.win = false;
+        assertTrue(testObj.getWinState());
+        testObj.setWinState(false);
         //diag right wins
         int[] diagRow1 = {1,0,0,0,0,0};
         int[] diagRow2 = {0,1,0,0,0,0};
@@ -106,19 +106,19 @@ public class ConnectFourTest {
         int[][] diagRightArray = {diagRow1, diagRow2, diagRow3, diagRow4, emptyCol, emptyCol, emptyCol};
         testObj.setSpaces(diagRightArray);
         testObj.checkWinCondition();
-        assertEquals(true, testObj.win);
-        testObj.win = false;
+        assertTrue(testObj.getWinState());
+        testObj.setWinState(false);
         //diag left wins
         int[][] diagLeftArray = {diagRow4, diagRow3, diagRow2, diagRow1, emptyCol, emptyCol, emptyCol};
         testObj.setSpaces(diagLeftArray);
         testObj.checkWinCondition();
-        assertEquals(true, testObj.win);
-        testObj.win = false;
+        assertTrue(testObj.getWinState());
+        testObj.setWinState(false);
         //no win at all
         int[][] noWinArray = {diagRow1, diagRow3, diagRow4, diagRow2, diagRow1, diagRow1, diagRow2};
         testObj.setSpaces(noWinArray);
         testObj.checkWinCondition();
-        assertEquals(false, testObj.win);
+        assertFalse(testObj.getWinState());
     }
 
     /**
