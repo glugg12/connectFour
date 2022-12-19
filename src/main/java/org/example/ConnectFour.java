@@ -2,7 +2,12 @@ package org.example;
 
 import java.io.IOException;
 import java.util.Scanner;
-
+//There are functions in here that are public for the sake of using them in tests. If I were following proper information hiding,
+//I may consider setting these to private and writing some sort of interface to get at them, but those interfaces would literally be
+//one line of code. I've left many functions public for this reason. Given that much of the code here is executed in "turn" blocks,
+//perhaps the tests themselves could be rewritten with that in consideration, and allow the internal individual functions to return to private.
+//Perhaps a development build leaves them public and a release build then removes the unit tests, which allows them to go private.
+//Many things to consider.
 class Board
 {
     public int[][] space = new int[7][6];
